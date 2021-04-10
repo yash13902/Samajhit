@@ -7,6 +7,8 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -18,6 +20,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,6 +32,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -41,26 +48,13 @@ import java.util.Objects;
 public class NeedHelp extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
-    private FirebaseFirestore db;
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    LocationManager locationManager;
+    LocationListener locationListener;
 
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            {
-                {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                        Location lastknownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                        updateMapLocation(lastknownLocation);
-                    }
-                }
-            }
-        }
-    }
+    private String email;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     @Override
@@ -72,9 +66,19 @@ public class NeedHelp extends FragmentActivity implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        db = FirebaseFirestore.getInstance();
+        Intent intent = getIntent();
+        email = intent.getStringExtra("Email");
 
-
+        Button query = findViewById(R.id.query);
+        query.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(ContextCompat.checkSelfPermission(NeedHelp.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    Location lastknownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    updateMapLocation(lastknownLocation);
+                }
+            }
+        });
     }
 
     @Override
@@ -85,36 +89,28 @@ public class NeedHelp extends FragmentActivity implements OnMapReadyCallback {
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},1);
-        else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-            Location lastknownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if(lastknownLocation!=null) {
-                updateMapLocation(lastknownLocation);
-            }
-        }
 
-        db.collection("Donate").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        db.collection("Help").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()) {
                     for(QueryDocumentSnapshot documentSnapshot : Objects.requireNonNull(task.getResult())) {
                         Double lat = (Double) documentSnapshot.getData().get("latitude");
                         Double lon = (Double) documentSnapshot.getData().get("longitude");
-                        LatLng userLocation = new LatLng(lat,lon);
-                        mMap.addMarker(new MarkerOptions().position(userLocation).title("U").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
+                        LatLng user = new LatLng(lat,lon);
+                        mMap.addMarker(new MarkerOptions().position(user).title("Donater").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                     }
                 }
             }
         });
+
     }
 
     public void updateMapLocation(Location location)
     {
-        mMap.clear();
         LatLng userLocation = new LatLng(location.getLatitude(),location.getLongitude());
         mMap.addMarker(new MarkerOptions().position(userLocation).title("Users Location"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation,10));
 
         Geocoder geocoder =  new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
@@ -150,7 +146,8 @@ public class NeedHelp extends FragmentActivity implements OnMapReadyCallback {
                 help.put("latitude",location.getLatitude());
                 help.put("longitude",location.getLongitude());
 
-                db.collection("Help").document(address).set(help);
+                db.collection("Help").document(email).set(help);
+
             }
 
         } catch (Exception e) {
@@ -158,4 +155,5 @@ public class NeedHelp extends FragmentActivity implements OnMapReadyCallback {
         }
 
     }
+
 }

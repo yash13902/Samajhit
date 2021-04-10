@@ -84,6 +84,7 @@ public class ExistingUserLogin extends AppCompatActivity {
                     if(task.isSuccessful()) {
                         //Log In success
                         Intent intent = new Intent(ExistingUserLogin.this, Help.class);
+                        intent.putExtra("Email",email);
                         startActivity(intent);
                         finish();
                     }

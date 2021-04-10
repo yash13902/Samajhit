@@ -107,6 +107,7 @@ public class NewUserLogin extends AppCompatActivity {
                         if(task.isSuccessful()) {
                             //SignUp success
                             Intent intent = new Intent(NewUserLogin.this,Help.class);
+                            intent.putExtra("Email",email);
                             startActivity(intent);
                             finish();
                         }
