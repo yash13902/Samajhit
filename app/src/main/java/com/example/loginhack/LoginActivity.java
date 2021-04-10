@@ -1,31 +1,40 @@
-package com.example.samajhit;
+package com.example.loginhack;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class ExistingUserLogin extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
+    @Override
+    protected void onStart() {
+        mAuth = FirebaseAuth.getInstance();
+        if(mAuth.getCurrentUser()!=null) {
+
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        super.onStart();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_existing_user_login);
+        setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
         EditText email = findViewById(R.id.emailLogIn);
@@ -37,7 +46,7 @@ public class ExistingUserLogin extends AppCompatActivity {
         signUpView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ExistingUserLogin.this, NewUserLogin.class);
+                Intent intent = new Intent(LoginActivity.this,SignUpActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -81,15 +90,15 @@ public class ExistingUserLogin extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
 
-                    if(task.isSuccessful()) {
-                        //Log In success
-                        Intent intent = new Intent(ExistingUserLogin.this, Help.class);
-                        intent.putExtra("Email",email);
-                        startActivity(intent);
-                        finish();
-                    }
-                    else
-                        Toast.makeText(this, "Invalid Email / Password", Toast.LENGTH_SHORT).show();
+                   if(task.isSuccessful()) {
+                       //Log In success
+                       Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
+                       intent.putExtra("Email",email);
+                       startActivity(intent);
+                       finish();
+                   }
+                   else
+                       Toast.makeText(this, "Invalid Email / Password", Toast.LENGTH_SHORT).show();
                 });
     }
 

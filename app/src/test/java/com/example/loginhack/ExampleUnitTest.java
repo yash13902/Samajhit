@@ -1,4 +1,4 @@
-package com.example.samajhit;
+package com.example.loginhack;
 
 import org.junit.Test;
 

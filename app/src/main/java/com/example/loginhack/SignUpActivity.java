@@ -1,4 +1,4 @@
-package com.example.samajhit;
+package com.example.loginhack;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +9,7 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,14 +18,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class NewUserLogin extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_user_login);
+        setContentView(R.layout.activity_sign_up);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -33,7 +34,6 @@ public class NewUserLogin extends AppCompatActivity {
         EditText email = findViewById(R.id.email);
         EditText pass = findViewById(R.id.password);
         EditText con_pass = findViewById(R.id.conPass);
-        EditText phoneNumber = findViewById(R.id.editTextPhone);
 
         Button create = findViewById(R.id.signUpAccButton);
 
@@ -42,7 +42,7 @@ public class NewUserLogin extends AppCompatActivity {
         logInView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(NewUserLogin.this,ExistingUserLogin.class);
+                Intent intent = new Intent(SignUpActivity.this,LoginActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -106,13 +106,13 @@ public class NewUserLogin extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()) {
                             //SignUp success
-                            Intent intent = new Intent(NewUserLogin.this,Help.class);
+                            Intent intent = new Intent(SignUpActivity.this,HomeActivity.class);
                             intent.putExtra("Email",email);
                             startActivity(intent);
                             finish();
                         }
                         else {
-                            Toast.makeText(NewUserLogin.this, "Email ID already exists..", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignUpActivity.this, "Email ID already exists..", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
