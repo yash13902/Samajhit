@@ -86,7 +86,7 @@ public class NeedHelpActivity extends FragmentActivity implements OnMapReadyCall
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},1);
 
-        db.collection("Help").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        db.collection("Donate").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()) {
